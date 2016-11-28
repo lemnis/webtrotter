@@ -1,0 +1,39 @@
+{
+  "name": "webthreat",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "build": "electron-packager . --overwrite"
+  },
+  "author": "Lisa Martens",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^1.4.8",
+    "electron-spawn": "^5.0.0"
+  },
+  "dependencies": {
+    "angular": "^1.5.9",
+    "chokidar": "^1.6.1",
+    "chrome-native-messaging": "^0.2.0",
+    "electron-prebuilt": "^1.4.8",
+    "electron-rebuild": "^1.4.0",
+    "lowdb": "^0.14.0",
+    "material-design-lite": "^1.2.1",
+    "parse-whois": "^1.0.0",
+    "traceroute": "^1.0.0",
+    "uuid": "^3.0.0",
+    "whois": "^2.3.6"
+  },
+  "build": {
+    "appId": "your.id",
+    "mac": {
+      "category": "your.app.category.type"
+    },
+    "win": {
+      "iconUrl": "(windows-only) https link to icon"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+.visted-pages{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+h1{
+    text-align: center;
+}
+
+.mdl-card {
+    margin: 20px;
+}
+
+.mdl-card > .mdl-card__title {
+  color: #fff;
+  height: 176px;
+  position: relative;
+}
+
+.hops{
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+}
+.hop{
+    width: 20px;
+    height: 176px;
+    flex-grow:1;
+}
