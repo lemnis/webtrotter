@@ -1,0 +1,15 @@
+{
+  "name": "webthreat",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "build": {
+    "appId": "your.id",
+    "mac": {
+      "category": "your.app.category.type"
+    },
+    "win": {
+      "iconUrl": "(windows-only) https link to icon"
+    }
+  }
+}

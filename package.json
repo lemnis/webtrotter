@@ -1,25 +1,33 @@
 {
-  "name": "webthreat",
+  "name": "webtrotter",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "app/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron .",
-    "build": "electron-packager . --overwrite"
+    "start": "electron ."
   },
   "author": "Lisa Martens",
   "license": "ISC",
   "devDependencies": {
+    "angular-route": "^1.6.0",
+    "browserify": "^13.1.1",
     "electron": "^1.4.8",
-    "electron-spawn": "^5.0.0"
+    "electron-packager": "^8.3.0",
+    "electron-spawn": "^5.0.0",
+    "event-stream": "^3.3.4",
+    "glob": "^7.1.1",
+    "gulp": "^3.9.1",
+    "gulp-bump": "^2.5.1",
+    "gulp-iconutil": "^1.2.0",
+    "gulp-json-editor": "^2.2.1",
+    "gulp-responsive": "^2.6.0",
+    "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
     "angular": "^1.5.9",
     "chokidar": "^1.6.1",
     "chrome-native-messaging": "^0.2.0",
-    "electron-prebuilt": "^1.4.8",
-    "electron-rebuild": "^1.4.0",
     "lowdb": "^0.14.0",
     "material-design-lite": "^1.2.1",
     "parse-whois": "^1.0.0",

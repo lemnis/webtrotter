@@ -1,0 +1,36 @@
+{
+    "blue": [86,91,160],
+    "red": [162,22,22],
+    "randomRanges": [
+        {
+            "hue": 55,
+            "lightness": 54,
+            "range": [50, 90],
+            "steps": 20
+        },
+        {
+            "hue": 150,
+            "saturation": 0,
+            "range": [30, 100],
+            "steps": 14
+        },
+        {
+            "hue": 23,
+            "saturation": 60,
+            "range": [25, 95],
+            "steps": 20
+        },
+        {
+            "hue": 199,
+            "saturation": 71,
+            "range": [5, 95],
+            "steps": 15
+        },
+        {
+            "hue": 18,
+            "saturation": 82,
+            "range": [45, 75],
+            "steps": 15
+        }
+    ]
+}
