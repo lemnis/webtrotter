@@ -4,98 +4,43 @@ delete window.exports;
 delete window.module;
 
 const {ipcRenderer} = nodeRequire('electron')
-const traceroute = nodeRequire('traceroute');
 var whois = nodeRequire('whois');
 var parser = nodeRequire("parse-whois");
-var angular = nodeRequire("angular");
 var colors = nodeRequire("./colors.js");
+var angular = nodeRequire("angular");
+
+const db = nodeRequire("./db.js");
+const DB_CONSTANTS = nodeRequire("../shared/db_constants.json");
 
 // Define the `app` module
-var app = angular.module('app', [nodeRequire('angular-route')]);
-
-app.factory('trace', ['$rootScope', '$q', '$log',
-function($rootScope, $q, $log) {
-    // console.log($rootScope);
-    return {
-        traceroute: function(obj) {
-            var deferred = $q.defer();
-            var url = new URL(obj.url).hostname;
-
-            traceroute.trace(url, function (err,hops) {
-                obj.hops = hops;
-                // callback(hops);
-                // $rootScope.settings = data;
-                deferred.resolve(hops);
-                console.log(deferred, hops);
-                $log.error("234",2);
-                // return hops;
+var app = angular.module('app', [nodeRequire('angular-route'), nodeRequire('ngmap')])
+    .config(function($routeProvider, $locationProvider) {
+        $routeProvider
+            .when('/map/:uuid', {
+                templateUrl: 'maps.html',
+                controller: 'maps'
+            })
+            .when('/', {
+                templateUrl: 'home.html',
+                controller: 'home'
             });
-            $log.error("234",2);
-            return deferred.promise;
-        },
-        items: [],
-        add: function(item) {
-            this.items.push(item);
-        }
-    };
-}
-]);
 
-app.service('alerts', function($q, $window) {
-    this.confirm = function(message, title, buttonLabels) {
-        var defer = $q.defer();
+        $routeProvider.otherwise({
+            redirectTo: '/'
+        });
 
-        if (navigator.notification && navigator.notification.confirm) {
-            var onConfirm = function(idx) {
-                idx === 1 ? defer.resolve() : defer.reject()
-            }
-
-            navigator.notification.confirm(message, onConfirm, title, buttonLabels)
-        } else {
-            $window.confirm(message) ? defer.resolve() : defer.reject()
-        }
-
-        return defer.promise
-    }
-    this.whois = function(obj) {
-        var deferred = $q.defer();
-
-        whois.lookup('facebook.com', function(err, data) {
-            if(err){
-                deferred.reject(err);
-                return;
-            }
-            var arr = parser.parseWhoIsData(data);
-
-            var obj = arr.filter(function ( key ) {
-                return key.attribute == "Name Server";
-            });
-            deferred.resolve(arr);
-        })
-
-        return deferred.promise;
-    }
-})
-
-ipcRenderer.on('console', function (event, arg) {
-    console.log(arg);
-});
+        $locationProvider.html5Mode({enabled: false, requireBase: false});
+    });
 
 // Define the `PhoneListController` controller on the `app` module
-app.controller('home', ['$scope', 'trace', "alerts", function PhoneListController($scope, trace, alerts) {
-    $scope.websites = [];
+app.controller('home', ['$scope', function($scope) {
+    $scope.websites = db.getRequests();
 
-    ipcRenderer.on('angular.websites', function (event, arg) {
-        console.log(arg);
-        $scope.websites = arg; // add website
-        $scope.$apply(); // update controller
-    });
-
-    ipcRenderer.on('angular.website', function (event, arg) {
-        console.log(arg);
-        $scope.websites.push(arg); // add website
-        $scope.$apply(); // update controller
-    });
+    ipcRenderer.on('databaseUpdated', (event, arg) => {
+        $scope.$apply(function(){
+            $scope.websites.push(arg);
+        });
+    })
 
     $scope.getKey = function(obj){
         for (var key in obj) {
@@ -112,7 +57,18 @@ app.controller('home', ['$scope', 'trace', "alerts", function PhoneListControlle
 
     $scope.getDate = (timestamp) => {
         var date = new Date(timestamp);
-        return date.getHours() + ":" + date.getMinutes()
+        return (date.getHours()<10?'0':'') + date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes()
+    }
+
+    $scope.viewBox = (traceroute, $event) => {
+        var offset = 20;
+        var result = [
+            (traceroute.length-1)*offset*-1,
+            0,
+            89.6 + (traceroute.length-1)*offset,
+            37.5
+        ].join(" ");
+        return result;
     }
 
     /**
@@ -125,32 +81,51 @@ app.controller('home', ['$scope', 'trace', "alerts", function PhoneListControlle
     }
 }]);
 
-app.controller('maps', function($scope, $route, $routeParams) {
-     $scope.$route = $route;
-     $scope.$routeParams = $routeParams;
+app.controller('maps', nodeRequire("./renderer/maps.js"));
+
+app.run(['$rootScope', '$route', function($rootScope, $route) {
+    $rootScope.$on('$routeChangeSuccess', function() {
+        if($route.current.loadedTemplateUrl == "maps.html"){
+            document.title = "Traceroute";
+        } else {
+            document.title = "Visited sites last day";
+        }
+    });
+}]);
+
+var offset = 40;
+app.directive('visualCable', function() {
+    return {
+        template: function(element, attr){
+            return "";
+        },
+        link: function(scope, element, attrs, controllers) {
+            for(var i = 0; i <  scope.website.traceroute.length; i++){
+                for(var ip in scope.website.traceroute[i]){break;}
+
+                var piece = document.createElementNS("http://www.w3.org/2000/svg","path");
+                piece.setAttributeNS(null,"fill",colors.get(ip));
+                piece.setAttributeNS(null,"style","transform: translateX(-"+offset*i+"px)");
+                piece.setAttributeNS(null,"d","M5.9 0.2c-8.1 9.9-7.3 24.5-0.4 35.6 0.3 0.5 1.4 1 1.4 1.4h43.1v-37H5.9z");
+
+                element[0].insertBefore(piece, element[0].querySelector("*"));
+            }
+        }
+    };
 });
 
-app.controller('MainController', function($scope, $route, $routeParams, $location) {
+app.controller('MainController', function($scope, $route, $routeParams, $location, $rootScope) {
      $scope.$route = $route;
      $scope.$location = $location;
      $scope.$routeParams = $routeParams;
- })
 
-
-app.config(function($routeProvider, $locationProvider) {
-    $routeProvider
-        .when('/map/:uuid', {
-            templateUrl: 'maps.html',
-            controller: 'maps'
-        })
-        .when('/', {
-            templateUrl: 'home.html',
-            controller: 'home'
-        });
-
-    $routeProvider.otherwise({
-        redirectTo: '/'
+    $rootScope.$on('$routeChangeSuccess', function() {
+        if($route.current.loadedTemplateUrl == "maps.html"){
+            $scope.mapIsShown = true;
+            $scope.title = "Traceroute";
+        } else {
+            $scope.mapIsShown = false;
+            $scope.title = "Visited sites last day";
+        }
     });
-
-    $locationProvider.html5Mode({enabled: false, requireBase: false});
-});
+ })

@@ -13,16 +13,22 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body ng-controller="MainController" class=" mdl-layout mdl-js-layout  mdl-layout--fixed-header">
-    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout--no-drawer-button">
         <!-- top header  -->
         <header class="mdl-layout__header mdl-color--grey-100 mdl-color-text--grey-600">
             <div class="mdl-layout__header-row">
-                <span class="mdl-layout-title">Visited sites last day</span>
+                <div class="mdl-cell mdl-cell--1-col">
+                    <a ng-show="mapIsShown" href="#!/map" class="mdl-button mdl-js-button mdl-button--icon">
+                        <i class="material-icons">arrow_back</i>
+                    </a>
+                </div>
+                <span class="mdl-layout-title">{{title}}</span>
             </div>
         </header>
 
         <main class="mdl-layout__content mdl-color--grey-100" ng-view></main>
     </div>
+    <script src="http://maps.google.com/maps/api/js"></script>
 </main>
 </body>
 </html>

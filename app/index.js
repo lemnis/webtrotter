@@ -18,7 +18,7 @@ process.stdin
 .pipe(new nativeMessage.Transform((msg, push, done) => {
     const hostname = url.parse(msg.url).hostname;
     if(msg.type == DB_CONSTANTS.UPDATE){
-        push(db.addUrl(msg.referenceID, msg.url));
+        push(db.addUrl(msg.id, msg.url));
     } else {
         push(db.insertUrl({
             id: msg.id,
@@ -27,13 +27,10 @@ process.stdin
             urls: [msg.url],
             timestamp: msg.timestamp
         }));
-        if(mainWindow.webContents){
-            mainWindow.webContents.on('did-finish-load', () => {
-                mainWindow.webContents.send('angular.websites', db.getRequests())
-            })
-        }
+
         getTraceroute(hostname).then(calculatedRoute => {
-            db.insertTraceroute(msg.id, calculatedRoute);
+            push(db.addTraceroute(msg.id, calculatedRoute));
+            sendToApp(msg.id);
         }, error => push({err: error})); // #TODO:0 handle error messages somewhere may be visual
     }
     done();
@@ -53,6 +50,24 @@ function getTraceroute(hostname){
     });
 }
 
+function sendToApp(msg){
+    function sendMessage(){
+        mainWindow.webContents.send('databaseUpdated', db.getRequest(msg));
+    }
+
+    if(mainWindow.webContents && !mainWindow.webContents.isLoading()){
+        sendMessage();
+    } else if (mainWindow.webContents){
+        mainWindow.webContents.on('did-finish-load', () => {
+            sendMessage();
+        })
+    } else if('once' in mainWindow) {
+        mainWindow.once('ready-to-show', () => {
+            sendMessage();
+        })
+    }
+}
+
 // Keep a global reference of the window object
 let mainWindow
 
@@ -67,29 +82,23 @@ function createWindow () {
         slashes: true
     }))
 
-    // Open the DevTools.
-    mainWindow.webContents.openDevTools()
-
     mainWindow.webContents.on('did-finish-load', () => {
         mainWindow.webContents.send('angular.websites', db.getRequests())
     })
 
-    // console.log(app.getPath("exe") + "/../../bash");
-
-    // var manifest_path = app.getPath("home") + '/Library/Application Support/Google/Chrome/NativeMessagingHosts/webtrotter.lemnis.github.io.json';
-    // fs.access(
-    //     manifest_path,
-    //     fs.constants.W_OK,
-    //     (err) => {
-    //         // console.log(err);
-    //         // if(err.code == "ENOENT"){ // file doesn't exist
-    //         fs.writeFile(manifest_path, chromeNativeMessagingManifest(), (err) => {
-    //             if (err) throw err;
-    //             }
-    //         );
-    //         // }
-    //     }
-    // );
+    var manifest_path = app.getPath("home") + '/Library/Application Support/Google/Chrome/NativeMessagingHosts/webtrotter.lemnis.github.io.json';
+    fs.access(
+        manifest_path,
+        fs.constants.W_OK,
+        (err) => {
+            if(err && err.code == "ENOENT"){ // file doesn't exist
+                fs.writeFile(manifest_path, chromeNativeMessagingManifest(), (err) => {
+                    if (err) throw err;
+                    }
+                );
+            }
+        }
+    );
 
     fs.access(
         app.getPath("home") + '/Library/Application Support/Google/Chrome/Default/Extensions/' + extension_id,

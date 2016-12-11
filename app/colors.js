@@ -29,15 +29,15 @@ calculatePossibleColors();
  * @return {object} - The color-object
  */
 function generateColor(){
-    var result = {
-        type: "hsl"
-    };
-
     // check if all colors already are used
     if(possibleColors.length <= 0){
         console.error("no new colors available");
         return {h: 0, s: 0, l: 0, type: "hsl"};
     }
+    
+    var result = {
+        type: "hsl"
+    };
 
     // calculate random index to pick a color
     var randomIndex = Math.floor(Math.random() * possibleColors.length);

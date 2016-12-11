@@ -1,8 +1,12 @@
 // modules
 const low = require('lowdb');       // used database library
 const uuid = require('uuid');       // generates unique id
-const {app} = require('electron');  // to find database location
+var {app} = require('electron');  // to find database location
 const path = require('path');       // joins pieces of specific pat
+
+if(!app){
+    var {app} = require('electron').remote;
+}
 
 const db = low(path.join(app.getPath('userData'), 'db.json')); // open the db
 db.defaults({ urls: []}).value();   // construct the db
@@ -33,20 +37,24 @@ exports.insertUrl = function(data){
  * @return {object}     - type of database action and used id
  */
 exports.addUrl = function(id, url){
-    db.get('urls').find({ id }).get('urls').push(url).value()
+    var record = db.get('urls').find({ id }).get('urls').push(url).value();
 
     return {
         type: "UPDATE",
-        id: id
+        id: id,
+        url: url,
+        record: record
     }
 }
 
 exports.addTraceroute = function(id, traceroute){
-    db.get('urls').find({ id }).assign({traceroute}).value()
+    var record = db.get('urls').find({ id }).assign({traceroute}).value()
 
     return {
         type: "UPDATE",
-        id: id
+        id: id,
+        traceroute: traceroute,
+        record: record
     }
 }
 
@@ -56,4 +64,8 @@ exports.addTraceroute = function(id, traceroute){
  */
 exports.getRequests = function(){
     return db.get('urls').value();
+}
+
+exports.getRequest = function(id){
+    return db.get('urls').find({ id }).value();
 }

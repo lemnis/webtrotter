@@ -34,7 +34,6 @@ Message.prototype.disconnect = function(msg){
 
     appendMessage(msg);
     port = null;
-    // this.emit("disconnect", msg);
 }
 
 var message = new Message();

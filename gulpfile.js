@@ -69,7 +69,7 @@ gulp.task('build:osx', (callback) => {
         cache: './cache',
         dir: './',
         ignore: './build, ./extension',
-        icon: './app/img/icon.icns',
+        icon: './icon.icns',
         name: pkg.name,
         out: './build/app',
         overwrite: true,
