@@ -18,7 +18,6 @@ db._.mixin({
         var endOfDay =  Math.floor(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).getTime());
 
         return array.filter((obj) => {
-            console.log(obj.timestamp, (obj.timestamp > beginOfDay && obj.timestamp < endOfDay), beginOfDay, endOfDay);
             return (obj.timestamp > beginOfDay && obj.timestamp < endOfDay);
         })
     }
