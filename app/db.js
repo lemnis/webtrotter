@@ -11,6 +11,19 @@ if(!app){
 const db = low(path.join(app.getPath('userData'), 'db.json')); // open the db
 db.defaults({ urls: []}).value();   // construct the db
 
+db._.mixin({
+    today: function(array) {
+        var today = new Date(Date.now());
+        var beginOfDay =  Math.floor(new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime());
+        var endOfDay =  Math.floor(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).getTime());
+
+        return array.filter((obj) => {
+            console.log(obj.timestamp, (obj.timestamp > beginOfDay && obj.timestamp < endOfDay), beginOfDay, endOfDay);
+            return (obj.timestamp > beginOfDay && obj.timestamp < endOfDay);
+        })
+    }
+})
+
 /**
  * Insert specific entry to url table
  * @param  {object} data            - entry to store
@@ -63,7 +76,7 @@ exports.addTraceroute = function(id, traceroute){
  * @return {object} - all urls within timerange
  */
 exports.getRequests = function(){
-    return db.get('urls').value();
+    return db.get('urls').today().value();
 }
 
 exports.getRequest = function(id){
